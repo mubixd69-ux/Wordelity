@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://cc4eoj1t7pkm0"]
+
+[ext_resource type="Script" uid="uid://bddjli0ftui4b" path="res://scripts/label.gd" id="1_ar2rp"]
+
+[node name="Label" type="Label" unique_id=821198247]
+offset_right = 40.0
+offset_bottom = 23.0
+text = "cat"
+script = ExtResource("1_ar2rp")
