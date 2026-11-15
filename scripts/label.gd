@@ -2,6 +2,7 @@ extends Label
 
 var speed = 100
 var special = ""
+var original = ""
 
 func _process(delta: float) -> void:
 	if get_parent().frozen:

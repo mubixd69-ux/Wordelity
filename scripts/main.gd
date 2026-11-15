@@ -1,40 +1,55 @@
 extends Node2D
 
 var word_scene = preload("res://scenes/word.tscn")
-var words = ["cat", "dog", "sun", "moon", "star", "tree", "fish", "cake", "frog", "bird", "rabbit", "garden", "wizard", "rocket", "dragon", "balloon", "penguin", "rainbow", "elephant", "adventure"]
+var words = ["cat", "dog", "sun", "pig", "hat", "bee", "owl", "ant", "fox", "bus", "cup", "map", "moon", "star", "tree", "fish", "cake", "frog", "bird", "rain", "snow", "wind", "book", "ship", "duck", "bear", "kite", "rabbit", "garden", "wizard", "rocket", "dragon", "balloon", "penguin", "rainbow", "elephant", "adventure"]
 var specials = {"life": Color.GREEN, "freeze": Color.CYAN, "boom": Color.RED}
 var locked_word = null
 var lives = 5
 var score = 0
 var combo = 0
 var frozen = false
+var forbidden = []
+var round_number = 1
 
 @onready var score_label = $ScoreLabel
 @onready var lives_label = $LivesLabel
 @onready var combo_label = $ComboLabel
+@onready var forbidden_label = $ForbiddenLabel
 
 func _on_timer_timeout():
 	if frozen:
 		return
-	var word = word_scene.instantiate()
-	var max_length = 3 + int(score/ 400.0)
-	var choices = words.filter(func(w): return w.length() <= max_length)
-	word.text = choices.pick_random()
+		
+	var blocked = []
+	for w in get_tree().get_nodes_in_group("words"):
+		if forbidden.has(w.original):
+			blocked.append(w.original[0])
 	
-	if randf() < 0.1:
+	var max_length = 3 + int(score / 400.0)
+	var choices = words.filter(func(w): return w.length() <= max_length and not blocked.has(w[0]))
+	if choices.is_empty():
+		return
+	
+	var word = word_scene.instantiate()
+	if randf() < 0.25 and not forbidden.is_empty():
+		word.text = forbidden.pick_random()
+	elif randf() < 0.1:
 		var kind = specials.keys().pick_random()
 		word.text = kind
 		word.special = kind
 		word.modulate = specials[kind]
-	
+	else:
+		word.text = choices.pick_random()
+	word.original = word.text
+	word.speed = minf(60 + score / 40.0, 250)
 	word.position.x = randf_range(50, 1050)
 	word.position.y = -20
-	word.speed = minf(60 + score / 40.0, 250)
 	word.add_to_group("words")
 	add_child(word)
 	
 	$Timer.wait_time = maxf(0.8, 2.0 - score / 2000.0)
-
+	
+	
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.is_echo():
 		
@@ -90,6 +105,7 @@ func word_missed(word):
 
 func _ready() -> void:
 	update_labels()
+	new_round()
 
 func update_labels():
 	score_label.text = "Score: " + str(score)
@@ -107,3 +123,21 @@ func use_special(kind):
 		for word in get_tree().get_nodes_in_group("words"):
 			word.queue_free()
 	
+
+
+func _on_round_timer_timeout() -> void:
+	round_number += 1
+	new_round()
+	
+func new_round():
+	forbidden.clear()
+	var pool = words.filter(func(w): return w.length() <= 5)
+	pool.shuffle()
+	var used_letters = []
+	for w in pool:
+		if forbidden.size() >= mini(1 + round_number, 4):
+			break
+		if not used_letters.has(w[0]):
+			forbidden.append(w)
+			used_letters.append(w[0])
+	forbidden_label.text = "DONT TYPE: " + ", ".join(forbidden)
