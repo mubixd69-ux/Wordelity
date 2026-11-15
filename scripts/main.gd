@@ -101,8 +101,9 @@ func _input(event: InputEvent) -> void:
 				
 				if locked_word.text == "":
 					if forbidden.has(locked_word.original):
-						lives -= 1
-						combo = 0
+						if not rush:
+							lives -= 1
+							combo = 0
 						if lives <= 0:
 							get_tree().reload_current_scene()
 					else:
@@ -123,6 +124,8 @@ func word_missed(word):
 	if word == locked_word:
 		locked_word = null
 	if forbidden.has(word.original):
+		return
+	if rush:
 		return
 	lives -= 1
 	combo = 0
