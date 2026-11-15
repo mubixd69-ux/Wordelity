@@ -78,16 +78,22 @@ func _input(event: InputEvent) -> void:
 		if locked_word != null:
 			if locked_word.text.begins_with(letter):
 				locked_word.text = locked_word.text.substr(1)
-				score += 10 * (1+ int(combo / 5.0))
+				if not forbidden.has(locked_word.original):
+					score += 10 * (1 + int(combo / 5.0))
 				
 				if locked_word.text == "":
-					combo += 1
-					use_special(locked_word.special)
-					
-					if combo % 10 == 0:
-						lives = mini(lives + 1, 5)
-					locked_word.queue_free()
-					locked_word = null
+					if forbidden.has(locked_word.original):
+						lives -= 1
+						combo = 0
+						if lives <= 0:
+							get_tree().reload_current_scene()
+					else:
+						combo += 1
+						use_special(locked_word.special)
+						if combo % 10 == 0:
+							lives = mini(lives + 1, 5)
+						locked_word.queue_free()
+						locked_word = null
 			else:
 					combo = 0
 		else:
@@ -97,6 +103,8 @@ func _input(event: InputEvent) -> void:
 func word_missed(word):
 	if word == locked_word:
 		locked_word = null
+	if forbidden.has(word.original):
+		return
 	lives -= 1
 	combo = 0
 	update_labels()
