@@ -2,12 +2,14 @@ extends Node2D
 
 var word_scene = preload("res://scenes/word.tscn")
 var words = ["cat", "dog", "sun", "pig", "hat", "bee", "owl", "ant", "fox", "bus", "cup", "map", "moon", "star", "tree", "fish", "cake", "frog", "bird", "rain", "snow", "wind", "book", "ship", "duck", "bear", "kite", "rabbit", "garden", "wizard", "rocket", "dragon", "balloon", "penguin", "rainbow", "elephant", "adventure"]
-var specials = {"life": Color.GREEN, "freeze": Color.CYAN, "boom": Color.RED}
+var specials = {"life": Color.GREEN, "freeze": Color.CYAN, "boom": Color.RED, "slow": Color.DODGER_BLUE, "double": Color.GOLD}
 var locked_word = null
 var lives = 5
 var score = 0
 var combo = 0
 var frozen = false
+var slow = false
+var double_score = false
 var letter_timnes = []
 var start_time = 0
 var forbidden = []
@@ -87,7 +89,7 @@ func _input(event: InputEvent) -> void:
 				letter_timnes.append(Time.get_ticks_msec())
 				
 				if not forbidden.has(locked_word.original):
-					score += 10 * (1 + int(combo / 5.0))
+					score += 10 * (1 + int(combo / 5.0)) * (2 if double_score else 1)
 				
 				if locked_word.text == "":
 					if forbidden.has(locked_word.original):
@@ -103,6 +105,7 @@ func _input(event: InputEvent) -> void:
 					locked_word.queue_free()
 					locked_word = null
 			else:
+				
 					combo = 0
 		else:
 			combo = 0
@@ -138,6 +141,14 @@ func use_special(kind):
 	elif kind == "boom":
 		for word in get_tree().get_nodes_in_group("words"):
 			word.queue_free()
+	elif kind == "slow":
+		slow = true
+		await get_tree().create_timer(5.0).timeout
+		slow = false
+	elif kind == "double":
+		double_score = true
+		await get_tree().create_timer(3.0).timeout
+		double_score = false
 	
 
 

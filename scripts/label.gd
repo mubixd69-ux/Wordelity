@@ -7,7 +7,8 @@ var original = ""
 func _process(delta: float) -> void:
 	if get_parent().frozen:
 		return
-	position.y += speed * delta
+	var factor = 0.5 if get_parent().slow else 1.0
+	position.y += speed * factor * delta
 	if position.y > 600:
 		get_parent().word_missed(self)
 		queue_free()
