@@ -1,7 +1,7 @@
 extends Node2D
 
 var word_scene = preload("res://scenes/word.tscn")
-var words = ["cat", "dog", "sun", "moon", "star", "tree", "fish", "cake", "frog", "bird"]
+var words = ["cat", "dog", "sun", "moon", "star", "tree", "fish", "cake", "frog", "bird", "rabbit", "garden", "wizard", "rocket", "dragon", "balloon", "penguin", "rainbow", "elephant", "adventure"]
 var locked_word = null
 var lives = 5
 var score = 0
@@ -13,11 +13,16 @@ var combo = 0
 
 func _on_timer_timeout():
 	var word = word_scene.instantiate()
-	word.text = words.pick_random()
+	var max_length = 4 + int(score/ 200.0)
+	var choices = words.filter(func(w): return w.length() <= max_length)
+	word.text = choices.pick_random()
 	word.position.x = randf_range(50, 1050)
 	word.position.y = -20
+	word.speed = minf(100 + score / 20.0, 400)
 	word.add_to_group("words")
 	add_child(word)
+	
+	$Timer.wait_time = maxf(0.4, 1.0 - score / 3000.0)
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.is_echo():
