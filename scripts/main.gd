@@ -37,6 +37,15 @@ func _on_timer_timeout():
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.is_echo():
+		
+		if event.keycode == KEY_ESCAPE:
+			if locked_word != null:
+				locked_word.modulate = specials.get(locked_word.special, Color.WHITE)
+				locked_word = null
+				combo = 0
+				update_labels()
+			return
+		
 		if event.unicode == 0:
 			return
 		
@@ -45,9 +54,11 @@ func _input(event: InputEvent) -> void:
 		if locked_word == null:
 			for word in get_tree().get_nodes_in_group("words"):
 				if word.text.begins_with(letter):
-					locked_word = word
-					locked_word.modulate = Color.YELLOW
-					break
+					if locked_word == null or word.position.y > locked_word.position.y:
+						locked_word = word
+			if locked_word != null:
+				locked_word.modulate = Color.YELLOW
+				
 		
 		if locked_word != null:
 			if locked_word.text.begins_with(letter):
