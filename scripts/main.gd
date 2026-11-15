@@ -4,7 +4,7 @@ var word_scene = preload("res://scenes/word.tscn")
 var words = ["cat", "dog", "sun", "pig", "hat", "bee", "owl", "ant", "fox", "bus", "cup", "map", "moon", "star", "tree", "fish", "cake", "frog", "bird", "rain", "snow", "wind", "book", "ship", "duck", "bear", "kite", "rabbit", "garden", "wizard", "rocket", "dragon", "balloon", "penguin", "rainbow", "elephant", "adventure"]
 var specials = {"life": Color.GREEN, "freeze": Color.CYAN, "boom": Color.RED, "slow": Color.DODGER_BLUE, "double": Color.GOLD}
 var locked_word = null
-var lives = 5
+var lives = 5000
 var score = 0
 var combo = 0
 var frozen = false
@@ -14,12 +14,15 @@ var letter_timnes = []
 var start_time = 0
 var forbidden = []
 var round_number = 1
+var rush_meter = 0.0
+var rush = false
 
 @onready var score_label = $ScoreLabel
 @onready var lives_label = $LivesLabel
 @onready var combo_label = $ComboLabel
 @onready var forbidden_label = $ForbiddenLabel
 @onready var wpm_label = $WPMLabel
+@onready var rush_bar = $RushBar
 
 func _on_timer_timeout():
 	if frozen:
@@ -88,8 +91,13 @@ func _input(event: InputEvent) -> void:
 					start_time = Time.get_ticks_msec()
 				letter_timnes.append(Time.get_ticks_msec())
 				
+				if not rush:
+					rush_meter = minf(rush_meter + 6.0, 100.0)
+					if rush_meter >= 100:
+						rush = true
+				
 				if not forbidden.has(locked_word.original):
-					score += 10 * (1 + int(combo / 5.0)) * (2 if double_score else 1)
+					score += 10 * (1 + int(combo / 5.0)) * (2 if double_score else 1) * (2 if rush else 1)
 				
 				if locked_word.text == "":
 					if forbidden.has(locked_word.original):
@@ -170,6 +178,16 @@ func new_round():
 	forbidden_label.text = "DONT TYPE: " + ", ".join(forbidden)
 
 func _process(delta: float) -> void:
+	if rush:
+		rush_meter -= (100 / 6.0) * delta
+		if rush_meter <= 0.0:
+			rush_meter = 0.0
+			rush = false
+	else:
+		rush_meter = maxf(rush_meter - 6.0 * delta, 0.0)
+	rush_bar.value = rush_meter
+	rush_bar.modulate = Color.GOLD if rush else Color.WHITE
+	
 	if start_time == 0:
 		return
 	var now = Time.get_ticks_msec()
