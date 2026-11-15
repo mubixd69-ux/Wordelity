@@ -8,6 +8,8 @@ var lives = 5
 var score = 0
 var combo = 0
 var frozen = false
+var letter_timnes = []
+var start_time = 0
 var forbidden = []
 var round_number = 1
 
@@ -15,6 +17,7 @@ var round_number = 1
 @onready var lives_label = $LivesLabel
 @onready var combo_label = $ComboLabel
 @onready var forbidden_label = $ForbiddenLabel
+@onready var wpm_label = $WPMLabel
 
 func _on_timer_timeout():
 	if frozen:
@@ -78,6 +81,11 @@ func _input(event: InputEvent) -> void:
 		if locked_word != null:
 			if locked_word.text.begins_with(letter):
 				locked_word.text = locked_word.text.substr(1)
+				
+				if start_time == 0:
+					start_time = Time.get_ticks_msec()
+				letter_timnes.append(Time.get_ticks_msec())
+				
 				if not forbidden.has(locked_word.original):
 					score += 10 * (1 + int(combo / 5.0))
 				
@@ -92,8 +100,8 @@ func _input(event: InputEvent) -> void:
 						use_special(locked_word.special)
 						if combo % 10 == 0:
 							lives = mini(lives + 1, 5)
-						locked_word.queue_free()
-						locked_word = null
+					locked_word.queue_free()
+					locked_word = null
 			else:
 					combo = 0
 		else:
@@ -149,3 +157,13 @@ func new_round():
 			forbidden.append(w)
 			used_letters.append(w[0])
 	forbidden_label.text = "DONT TYPE: " + ", ".join(forbidden)
+
+func _process(delta: float) -> void:
+	if start_time == 0:
+		return
+	var now = Time.get_ticks_msec()
+	while not letter_timnes.is_empty() and now - letter_timnes[0] > 10000:
+		letter_timnes.pop_front()
+	var seconds = clampf((now - start_time) / 1000.0, 2.0, 10.0)
+	var wpm = (letter_timnes.size() / 5.0) / (seconds / 60.0)
+	wpm_label.text = "WPM: " + str(int(wpm))
