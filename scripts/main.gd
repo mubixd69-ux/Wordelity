@@ -4,7 +4,7 @@ var word_scene = preload("res://scenes/word.tscn")
 var words = ["cat", "dog", "sun", "pig", "hat", "bee", "owl", "ant", "fox", "bus", "cup", "map", "moon", "star", "tree", "fish", "cake", "frog", "bird", "rain", "snow", "wind", "book", "ship", "duck", "bear", "kite", "rabbit", "garden", "wizard", "rocket", "dragon", "balloon", "penguin", "rainbow", "elephant", "adventure"]
 var specials = {"life": Color.GREEN, "freeze": Color.CYAN, "boom": Color.RED, "slow": Color.DODGER_BLUE, "double": Color.GOLD}
 var locked_word = null
-var lives = 5000
+var lives = 5
 var score = 0
 var combo = 0
 var frozen = false
@@ -15,6 +15,7 @@ var start_time = 0
 var forbidden = []
 var round_number = 1
 var rush_meter = 0.0
+var high_score = 0
 var rush = false
 
 @onready var score_label = $ScoreLabel
@@ -23,6 +24,7 @@ var rush = false
 @onready var forbidden_label = $ForbiddenLabel
 @onready var wpm_label = $WPMLabel
 @onready var rush_bar = $RushBar
+@onready var high_score_label = $HighScoreLabel
 
 func _on_timer_timeout():
 	if frozen:
@@ -105,7 +107,7 @@ func _input(event: InputEvent) -> void:
 							lives -= 1
 							combo = 0
 						if lives <= 0:
-							get_tree().reload_current_scene()
+							game_over()
 					else:
 						combo += 1
 						use_special(locked_word.special)
@@ -131,9 +133,10 @@ func word_missed(word):
 	combo = 0
 	update_labels()
 	if lives <= 0:
-		get_tree().reload_current_scene()
+		game_over()
 
 func _ready() -> void:
+	load_high_score()
 	update_labels()
 	new_round()
 
@@ -141,6 +144,7 @@ func update_labels():
 	score_label.text = "Score: " + str(score)
 	lives_label.text = "Lives: " + str(lives)
 	combo_label.text = "Combo: " + str(combo)
+	high_score_label.text = "Best: " + str(maxi(high_score, score))
 
 func use_special(kind):
 	if kind == "life":
@@ -199,3 +203,21 @@ func _process(delta: float) -> void:
 	var seconds = clampf((now - start_time) / 1000.0, 2.0, 10.0)
 	var wpm = (letter_timnes.size() / 5.0) / (seconds / 60.0)
 	wpm_label.text = "WPM: " + str(int(wpm))
+
+
+# highscore saving
+
+func save_high_score():
+	var file = FileAccess.open("user://highscore.save", FileAccess.WRITE)
+	file.store_32(high_score)
+
+func load_high_score():
+	if FileAccess.file_exists("user://highscore.save"):
+		var file = FileAccess.open("user://highscore.save", FileAccess.READ)
+		high_score = file.get_32()
+
+func game_over():
+	if score > high_score:
+		high_score = score
+		save_high_score()
+	get_tree().reload_current_scene()

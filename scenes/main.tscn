@@ -29,6 +29,12 @@ offset_top = 600.0
 offset_right = 60.0
 offset_bottom = 623.0
 
+[node name="HighScoreLabel" type="Label" parent="." unique_id=34517534]
+offset_left = 20.0
+offset_top = 170.0
+offset_right = 60.0
+offset_bottom = 193.0
+
 [node name="WPMLabel" type="Label" parent="." unique_id=210049712]
 offset_left = 20.0
 offset_top = 90.0
