@@ -88,6 +88,7 @@ func _input(event: InputEvent) -> void:
 		if locked_word != null:
 			if locked_word.text.begins_with(letter):
 				locked_word.text = locked_word.text.substr(1)
+				locked_word.pop()
 				
 				if start_time == 0:
 					start_time = Time.get_ticks_msec()
