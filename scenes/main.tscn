@@ -1,9 +1,19 @@
 [gd_scene format=3 uid="uid://bboo3lkxw3wwn"]
 
 [ext_resource type="Script" uid="uid://dactbpgtbkvtd" path="res://scripts/main.gd" id="1_o5qli"]
+[ext_resource type="Texture2D" uid="uid://bxvkt8u4dnj5f" path="res://assets/Pink.png" id="2_sugp2"]
+[ext_resource type="Script" uid="uid://clryrxcg4be3k" path="res://scripts/background.gd" id="3_jyhfs"]
 
 [node name="Main" type="Node2D" unique_id=1476315742]
 script = ExtResource("1_o5qli")
+
+[node name="Background" type="Sprite2D" parent="." unique_id=339261664]
+texture_repeat = 2
+texture = ExtResource("2_sugp2")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1152, 648)
+script = ExtResource("3_jyhfs")
 
 [node name="ScoreLabel" type="Label" parent="." unique_id=1274414274]
 offset_left = 20.0
