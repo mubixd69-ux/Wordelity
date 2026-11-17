@@ -17,19 +17,24 @@ var round_number = 1
 var rush_meter = 0.0
 var high_score = 0
 var rush = false
+var full_heart = preload("res://assets/DEMO_Cozy_UI_Pack_doboui/DEMO_Cozy_UI_Pack_doboui/Icons/Icons Outline/64px/IconsOutline37_64px.png")
+var empty_heart = preload("res://assets/DEMO_Cozy_UI_Pack_doboui/DEMO_Cozy_UI_Pack_doboui/Icons/Icons Outline/64px/IconsOutline38_64px.png")
+var heart_full = [true, true, true, true, true]
 
 @onready var score_label = $ScoreLabel
-@onready var lives_label = $LivesLabel
 @onready var combo_label = $ComboLabel
 @onready var forbidden_label = $ForbiddenLabel
 @onready var wpm_label = $WPMLabel
 @onready var rush_bar = $RushBar
 @onready var high_score_label = $HighScoreLabel
+@onready var hearts = $Hearts.get_children()
 
 func _on_timer_timeout():
 	if frozen:
 		return
-		
+	
+	var difficulty = 1.0 - exp(-score / 1200.0)
+	
 	var blocked = []
 	for w in get_tree().get_nodes_in_group("words"):
 		if forbidden.has(w.original):
@@ -51,13 +56,13 @@ func _on_timer_timeout():
 	else:
 		word.text = choices.pick_random()
 	word.original = word.text
-	word.speed = minf(60 + score / 40.0, 250)
+	word.speed = 45 + 125 * difficulty
 	word.position.x = randf_range(50, 1050)
-	word.position.y = -20
+	word.position.y = 90
 	word.add_to_group("words")
 	add_child(word)
 	
-	$Timer.wait_time = maxf(0.8, 2.0 - score / 2000.0)
+	$Timer.wait_time = 2.2 - 1.4 * difficulty
 	
 	
 func _input(event: InputEvent) -> void:
@@ -143,9 +148,9 @@ func _ready() -> void:
 
 func update_labels():
 	score_label.text = "Score: " + str(score)
-	lives_label.text = "Lives: " + str(lives)
 	combo_label.text = "Combo: " + str(combo)
 	high_score_label.text = "Best: " + str(maxi(high_score, score))
+	update_hearts()
 
 func use_special(kind):
 	if kind == "life":
@@ -183,7 +188,7 @@ func new_round():
 		if not used_letters.has(w[0]):
 			forbidden.append(w)
 			used_letters.append(w[0])
-	forbidden_label.text = "DONT TYPE: " + ", ".join(forbidden)
+	forbidden_label.text = "\n".join(forbidden)
 
 func _process(delta: float) -> void:
 	if rush:
@@ -222,3 +227,34 @@ func game_over():
 		high_score = score
 		save_high_score()
 	get_tree().reload_current_scene()
+
+func update_hearts():
+	for i in range(hearts.size()):
+		var should_be_full = i >= hearts.size() - lives
+		if should_be_full and not heart_full[i]:
+			heart_full[i] = true
+			hearts[i].texture = full_heart
+			grow_in(hearts[i])
+		elif not should_be_full and heart_full[i]:
+			heart_full[i] = false
+			break_heart(hearts[i])
+
+func break_heart(heart):
+	heart.pivot_offset = heart.size / 2
+	var tween = create_tween()
+	tween.tween_property(heart, "scale", Vector2(1.4, 1.4), 0.1)
+	tween.set_parallel(true)
+	tween.tween_property(heart, "scale", Vector2.ZERO, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	tween.tween_property(heart, "rotation", 0.8, 0.25)
+	tween.chain().tween_callback(func():
+		heart.texture = empty_heart
+		heart.rotation = 0.0
+	)
+	tween.tween_property(heart, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	
+func grow_in(heart):
+	heart.pivot_offset = heart.size / 2
+	heart.scale = Vector2.ZERO
+	var tween = create_tween()
+	tween.tween_property(heart, "scale", Vector2.ONE, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	
