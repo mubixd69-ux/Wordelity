@@ -10,7 +10,7 @@ func _process(delta: float) -> void:
 		return
 	var factor = 0.5 if get_parent().slow else 1.0
 	position.y += speed * factor * delta
-	if position.y > 600:
+	if position.y > 430:
 		get_parent().word_missed(self)
 		queue_free()
 
