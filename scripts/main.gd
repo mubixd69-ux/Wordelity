@@ -57,6 +57,8 @@ func _on_timer_timeout():
 		word.text = kind
 		word.special = kind
 		word.modulate = specials[kind]
+		word.base_color = specials[kind]
+		word.lock_color = specials[kind]
 	else:
 		word.text = choices.pick_random()
 	word.original = word.text
@@ -76,7 +78,7 @@ func _input(event: InputEvent) -> void:
 		
 		if event.keycode == KEY_ESCAPE:
 			if locked_word != null:
-				locked_word.modulate = specials.get(locked_word.special, Color.WHITE)
+				locked_word.lock_off()
 				locked_word = null
 				combo = 0
 				update_labels()
@@ -93,7 +95,7 @@ func _input(event: InputEvent) -> void:
 					if locked_word == null or word.position.y > locked_word.position.y:
 						locked_word = word
 			if locked_word != null:
-				locked_word.modulate = Color.YELLOW
+				locked_word.lock_on()
 				
 		
 		if locked_word != null:

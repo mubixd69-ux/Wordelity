@@ -4,6 +4,9 @@ var speed = 100
 var special = ""
 var original = ""
 var pop_tween = null
+var base_color = Color.WHITE
+var lock_color = Color.YELLOW
+var normal_outline = 10
 
 func _process(delta: float) -> void:
 	if get_parent().frozen or get_parent().round_intro:
@@ -15,9 +18,10 @@ func _process(delta: float) -> void:
 		queue_free()
 
 func _ready() -> void:
+	normal_outline = get_theme_constant("outline_size")
 	if special != "":
 		var glow = create_tween().set_loops()
-		glow.tween_property(self, "self_modulate", Color(0.55, 0.55, 0.55), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		glow.tween_property(self, "self_modulate", Color(0.63, 0.63, 0.63), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		glow.tween_property(self, "self_modulate", Color.WHITE, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		
 func pop(letter):
@@ -31,7 +35,7 @@ func pop(letter):
 	pop_tween.set_parallel(true)
 	pop_tween.tween_property(self, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	pop_tween.tween_property(self, "rotation", 0.0, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	pop_tween.tween_property(self, "modulate", Color.YELLOW, 0.15)
+	pop_tween.tween_property(self, "modulate", lock_color, 0.15)
 	fly_off(letter)
 
 func fly_off(letter):
@@ -51,3 +55,11 @@ func fly_off(letter):
 	tween.tween_property(flyer, "scale", Vector2(1.8, 1.8), 0.5)
 	tween.tween_property(flyer, "modulate:a", 0.0, 0.35).set_delay(0.15)
 	tween.chain().tween_callback(flyer.queue_free)
+
+func lock_on():
+	modulate = lock_color
+	add_theme_constant_override("outline_size", normal_outline + 6)
+
+func lock_off():
+	modulate = base_color
+	add_theme_constant_override("outline_size", normal_outline)
