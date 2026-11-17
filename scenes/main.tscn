@@ -208,5 +208,13 @@ offset_bottom = 430.0
 theme_override_constants/separation = 90
 alignment = 1
 
+[node name="FlashOverlay" type="CanvasLayer" parent="." unique_id=88849114]
+layer = 11
+
+[node name="Flash" type="ColorRect" parent="FlashOverlay" unique_id=913771004]
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(1, 1, 1, 0)
+
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="timeout" from="RoundTimer" to="." method="_on_round_timer_timeout"]
