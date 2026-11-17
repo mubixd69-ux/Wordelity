@@ -6,7 +6,7 @@ var original = ""
 var pop_tween = null
 
 func _process(delta: float) -> void:
-	if get_parent().frozen:
+	if get_parent().frozen or get_parent().round_intro:
 		return
 	var factor = 0.5 if get_parent().slow else 1.0
 	position.y += speed * factor * delta

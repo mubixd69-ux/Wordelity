@@ -20,6 +20,7 @@ var rush = false
 var full_heart = preload("res://assets/DEMO_Cozy_UI_Pack_doboui/DEMO_Cozy_UI_Pack_doboui/Icons/Icons Outline/64px/IconsOutline37_64px.png")
 var empty_heart = preload("res://assets/DEMO_Cozy_UI_Pack_doboui/DEMO_Cozy_UI_Pack_doboui/Icons/Icons Outline/64px/IconsOutline38_64px.png")
 var heart_full = [true, true, true, true, true]
+var round_intro = false
 
 @onready var score_label = $ScoreLabel
 @onready var combo_label = $ComboLabel
@@ -27,10 +28,13 @@ var heart_full = [true, true, true, true, true]
 @onready var wpm_label = $WPMLabel
 @onready var rush_bar = $RushBar
 @onready var high_score_label = $HighScoreLabel
+@onready var dim = $RoundOverlay/Dim
+@onready var round_label = $RoundOverlay/RoundLabel
+@onready var banned_row = $RoundOverlay/BannedRows
 @onready var hearts = $Hearts.get_children()
 
 func _on_timer_timeout():
-	if frozen:
+	if frozen or round_intro:
 		return
 	
 	var difficulty = 1.0 - exp(-score / 1200.0)
@@ -66,6 +70,8 @@ func _on_timer_timeout():
 	
 	
 func _input(event: InputEvent) -> void:
+	if round_intro:
+		return
 	if event is InputEventKey and event.pressed and not event.is_echo():
 		
 		if event.keycode == KEY_ESCAPE:
@@ -145,6 +151,7 @@ func _ready() -> void:
 	load_high_score()
 	update_labels()
 	new_round()
+	show_round_intro()
 
 func update_labels():
 	score_label.text = "Score: " + str(score)
@@ -176,6 +183,7 @@ func use_special(kind):
 func _on_round_timer_timeout() -> void:
 	round_number += 1
 	new_round()
+	show_round_intro()
 	
 func new_round():
 	forbidden.clear()
@@ -257,4 +265,48 @@ func grow_in(heart):
 	heart.scale = Vector2.ZERO
 	var tween = create_tween()
 	tween.tween_property(heart, "scale", Vector2.ONE, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	
+func show_round_intro():
+	round_intro = true
+	$RoundTimer.stop()
+	
+	for child in banned_row.get_children():
+		child.queue_free()
+	banned_row.modulate.a = 1.0
+	
+	round_label.text = "ROUND " + str(round_number)
+	round_label.modulate.a = 0.0
+	round_label.scale = Vector2(0.6, 0.6)
+	round_label.pivot_offset = round_label.size / 2
+	
+	var banned_labels = []
+	for w in forbidden:
+		var l = Label.new()
+		l.text = w.to_upper()
+		l.add_theme_font_size_override("font_size", 64)
+		l.add_theme_constant_override("outline_size", 14)
+		l.add_theme_color_override("font_outline_color", Color("3b1f4a"))
+		l.modulate.a = 0.0
+		banned_row.add_child(l)
+		banned_labels.append(l)
+	
+	var tween = create_tween()
+	tween.tween_property(dim, "color:a", 0.65, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(round_label, "modulate:a", 1.0, 0.4)
+	tween.parallel().tween_property(round_label, "scale", Vector2.ONE, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	
+	for l in banned_labels:
+		tween.tween_property(l, "modulate:a", 1.0, 0.3)
+	
+	tween.tween_interval(1.2)
+	tween.tween_property(dim, "color:a", 0.0, 0.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.parallel().tween_property(round_label, "modulate:a", 0.0, 0.5)
+	tween.parallel().tween_property(banned_row, "modulate:a", 0.0, 0.5)
+	await tween.finished
+	
+	round_intro = false
+	$RoundTimer.start()
+	
+	
+	
 	

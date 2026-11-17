@@ -180,5 +180,33 @@ texture = ExtResource("10_choun")
 expand_mode = 1
 stretch_mode = 3
 
+[node name="RoundOverlay" type="CanvasLayer" parent="." unique_id=1590705897]
+layer = 10
+
+[node name="Dim" type="ColorRect" parent="RoundOverlay" unique_id=1602766353]
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(0, 0, 0, 0)
+
+[node name="RoundLabel" type="Label" parent="RoundOverlay" unique_id=1429293470]
+offset_left = 226.0
+offset_top = 220.0
+offset_right = 926.0
+offset_bottom = 320.0
+theme_override_colors/font_outline_color = Color(0.23137255, 0.12156863, 0.2901961, 1)
+theme_override_constants/outline_size = 16
+theme_override_fonts/font = ExtResource("4_jyhfs")
+theme_override_font_sizes/font_size = 96
+text = "ROUND ONE"
+horizontal_alignment = 1
+
+[node name="BannedRows" type="HBoxContainer" parent="RoundOverlay" unique_id=1150613278]
+offset_left = 126.0
+offset_top = 350.0
+offset_right = 1026.0
+offset_bottom = 430.0
+theme_override_constants/separation = 90
+alignment = 1
+
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="timeout" from="RoundTimer" to="." method="_on_round_timer_timeout"]
