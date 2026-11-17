@@ -52,7 +52,7 @@ func _on_timer_timeout():
 	var word = word_scene.instantiate()
 	if randf() < 0.25 and not forbidden.is_empty():
 		word.text = forbidden.pick_random()
-	elif randf() < 0.1:
+	elif randf() < 0.6:
 		var kind = specials.keys().pick_random()
 		word.text = kind
 		word.special = kind

@@ -14,6 +14,12 @@ func _process(delta: float) -> void:
 		get_parent().word_missed(self)
 		queue_free()
 
+func _ready() -> void:
+	if special != "":
+		var glow = create_tween().set_loops()
+		glow.tween_property(self, "self_modulate", Color(0.55, 0.55, 0.55), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		glow.tween_property(self, "self_modulate", Color.WHITE, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		
 func pop(letter):
 	if pop_tween:
 		pop_tween.kill()
