@@ -163,7 +163,7 @@ func update_labels():
 
 func use_special(kind, origin = Vector2.ZERO):
 	if kind == "life":
-		lives = mini(lives + 1, 5)
+		life_effect(origin)
 	elif kind == "freeze":
 		frozen = true
 		await get_tree().create_timer(4.0).timeout
@@ -309,8 +309,8 @@ func show_round_intro():
 	$RoundTimer.start()
 	
 func boom(origin):
-	#flash()
-	#shake(18.0, 0.4)
+	flash()
+	shake(18.0, 0.4)
 	
 	var ring = Node2D.new()
 	ring.set_script(preload("res://scripts/shockwave.gd"))
@@ -377,3 +377,40 @@ func shake(strength, duration):
 		tween.tween_property(self, "position", offset, duration / steps)
 	tween.tween_property(self, "position", Vector2.ZERO, 0.05)
 	
+func life_effect(origin):
+	var from = origin + Vector2(30, 20)
+	
+	var ring = Node2D.new()
+	ring.set_script(preload("res://scripts/shockwave.gd"))
+	ring.ring_color = Color("#5ee05e")
+	ring.max_radius = 140.0
+	ring.position = from
+	add_child(ring)
+	ring.start()
+	
+	if lives >= 5:
+		return
+	var idx = hearts.size() - lives - 1
+	var target = hearts[idx].global_position + hearts[idx].size / 2
+	fly_heart(from, target)
+
+func fly_heart(from, to):
+	var s = Sprite2D.new()
+	s.texture = full_heart
+	s.position = from
+	s.scale = Vector2.ZERO
+	add_child(s)
+	var mid = (from + to) / 2 + Vector2(0, -140)
+	var tween = create_tween()
+	tween.tween_property(s, "scale", Vector2(1.1, 1.1), 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_method(_bezier_step.bind(s, from, mid, to), 0.0, 1.0, 0.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_callback(func():
+		s.queue_free()
+		lives = mini(lives + 1 , 5)
+		update_labels()
+	)
+
+func _bezier_step(t, s, from, mid, to):
+	if not is_instance_valid(s):
+		return
+	s.position = from.lerp(mid, t).lerp(mid.lerp(to, t), t)
