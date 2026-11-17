@@ -176,6 +176,7 @@ func use_special(kind, origin = Vector2.ZERO):
 		slow = false
 	elif kind == "double":
 		double_score = true
+		double_effect(3.0)
 		await get_tree().create_timer(3.0).timeout
 		double_score = false
 	
@@ -414,3 +415,59 @@ func _bezier_step(t, s, from, mid, to):
 	if not is_instance_valid(s):
 		return
 	s.position = from.lerp(mid, t).lerp(mid.lerp(to, t), t)
+
+func double_effect(duration):
+	var old_color = score_label.modulate
+	score_label.pivot_offset = score_label.size / 2
+	score_label.modulate = Color("#ffd93d")
+	var pulse = create_tween().set_loops(int(duration / 0.5))
+	pulse.tween_property(score_label, "scale",Vector2(1.12, 1.12), 0.25).set_trans(Tween.TRANS_SINE)
+	
+	var badge = Node2D.new()
+	badge.set_script(preload("res://scripts/badge.gd"))
+	badge.position = score_label.global_position + Vector2(score_label.size.x + 40, score_label.size.y / 2)
+	add_child(badge)
+	badge.start(duration)
+	
+	for i in range(int(duration / 0.08)):
+		spawn_star()
+		await get_tree().create_timer(0.08).timeout
+	
+	score_label.modulate = old_color
+	score_label.scale = Vector2.ONE
+
+func spawn_star():
+	var r = randf_range(9.0, 16.0)
+	var star = Polygon2D.new()
+	star.polygon = star_points(r)
+	star.color = Color("#ffd93d")
+	
+	var outline = Line2D.new()
+	outline.points = star_points(r)
+	outline.closed = true
+	outline.width = 3.0
+	outline.default_color = Color("#3b1f4a")
+	star.add_child(outline)
+	
+	star.position = Vector2(randf_range(60, 1090), 20)
+	star.rotation = randf_range(0, TAU)
+	add_child(star)
+	
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(star, "position:y", 540.0, randf_range(1.0, 1.6)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(star, "rotation", star.rotation + randf_range(-4.0, 4.0), 1.4)
+	tween.tween_property(star, "modulate:a", 0.0, 0.5).set_delay(0.9)
+	tween.chain().tween_callback(star.queue_free)
+	
+func star_points(r):
+	var pts = PackedVector2Array()
+	for i in range(10):
+		var ang = -PI / 2 + i * PI / 5
+		var rad = r if i % 2 == 0 else r * 0.45
+		pts.append(Vector2(cos(ang), sin(ang)) * rad)
+	return pts
+	
+	
+	
+	
