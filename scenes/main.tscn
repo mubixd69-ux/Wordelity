@@ -216,5 +216,10 @@ offset_right = 1152.0
 offset_bottom = 648.0
 color = Color(1, 1, 1, 0)
 
+[node name="SlowTint" type="ColorRect" parent="FlashOverlay" unique_id=119620835]
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(0.2901961, 0.6392157, 1, 0)
+
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="timeout" from="RoundTimer" to="." method="_on_round_timer_timeout"]

@@ -172,6 +172,7 @@ func use_special(kind, origin = Vector2.ZERO):
 		boom(origin)
 	elif kind == "slow":
 		slow = true
+		slow_effect(5.0)
 		await get_tree().create_timer(5.0).timeout
 		slow = false
 	elif kind == "double":
@@ -468,6 +469,37 @@ func star_points(r):
 		pts.append(Vector2(cos(ang), sin(ang)) * rad)
 	return pts
 	
+func slow_effect(duration):
+	var tint = $FlashOverlay/SlowTint
+	var tween = create_tween()
+	tween.tween_property(tint, "color:a", 0.22, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	var beats = int((duration - 1.0) / 0.9)
+	for i in range(beats):
+		tween.tween_property(tint, "color:a", 0.14, 0.45).set_trans(Tween.TRANS_SINE)
+		tween.tween_property(tint, "color:a", 0.24, 0.45).set_trans(Tween.TRANS_SINE)
+	tween.tween_property(tint, "color:a", 0.0, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	
+	for i in range(int(duration / 0.12)):
+		for w in get_tree().get_nodes_in_group("words"):
+			if w.text != "":
+				make_ghost(w)
+		await get_tree().create_timer(0.12).timeout
+
+func make_ghost(w):
+	var g = Label.new()
+	g.text = w.text
+	g.position = w.position
+	g.scale = w.scale
+	g.rotation = w.rotation
+	g.add_theme_font_size_override("font_size", w.get_theme_font_size("font_size"))
+	g.add_theme_constant_override("outline_size", w.get_theme_constant("outline_size"))
+	g.add_theme_color_override("font_outline_color", Color("#3b1f4a"))
+	g.modulate = Color(0.5, 0.75, 1.0, 0.4)
+	add_child(g)
+	g.move_child(g, w.get_index())
+	var tween = g.create_tween()
+	tween.tween_property(g, "modulate:a", 0.0, 0.45)
+	tween.tween_callback(g.queue_free)
 	
 	
 	
