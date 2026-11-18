@@ -166,8 +166,13 @@ func use_special(kind, origin = Vector2.ZERO):
 		life_effect(origin)
 	elif kind == "freeze":
 		frozen = true
+		for w in get_tree().get_nodes_in_group("words"):
+			if w.text != "":
+				w.freeze_on()
 		await get_tree().create_timer(4.0).timeout
 		frozen = false
+		for w in get_tree().get_nodes_in_group("words"):
+			w.freeze_off()
 	elif kind == "boom":
 		boom(origin)
 	elif kind == "slow":
