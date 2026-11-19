@@ -33,6 +33,15 @@ var round_intro = false
 @onready var banned_row = $RoundOverlay/BannedRows
 @onready var hearts = $Hearts.get_children()
 
+# sounds
+var sound_letter = preload("res://assets/Audio/click_002.ogg")
+var sound_wrong = preload("res://assets/Audio/click_005.ogg")
+var sound_word_done = preload("res://assets/Audio/glass_002.ogg")
+var sound_life_lost = preload("res://assets/Audio/switch_003.ogg")
+
+
+
+
 func _on_timer_timeout():
 	if frozen or round_intro:
 		return
@@ -102,6 +111,7 @@ func _input(event: InputEvent) -> void:
 			if locked_word.text.begins_with(letter):
 				locked_word.text = locked_word.text.substr(1)
 				locked_word.pop(letter)
+				play_sfx(sound_letter, -6.0, 1.0 + minf(combo * 0.03, 0.8) + randf_range(-0.02, 0.02))
 				
 				if start_time == 0:
 					start_time = Time.get_ticks_msec()
@@ -119,20 +129,23 @@ func _input(event: InputEvent) -> void:
 					if forbidden.has(locked_word.original):
 						if not rush:
 							lives -= 1
+							play_sfx(sound_wrong, -4.0, 0.7)
 							combo = 0
 						if lives <= 0:
 							game_over()
 					else:
 						combo += 1
+						play_sfx(sound_word_done, -3.0)
 						use_special(locked_word.special, locked_word.position)
 						if combo % 10 == 0:
 							lives = mini(lives + 1, 5)
 					locked_word.queue_free()
 					locked_word = null
 			else:
-				
+					play_sfx(sound_wrong, -4.0, 0.7)
 					combo = 0
 		else:
+			play_sfx(sound_wrong, -4.0, 0.7)
 			combo = 0
 		update_labels()
 			
@@ -257,6 +270,7 @@ func update_hearts():
 			break_heart(hearts[i])
 
 func break_heart(heart):
+	play_sfx(sound_life_lost)
 	heart.pivot_offset = heart.size / 2
 	var tween = create_tween()
 	tween.tween_property(heart, "scale", Vector2(1.4, 1.4), 0.1)
@@ -546,3 +560,15 @@ func freeze_effect(duration):
 	await tween_out.finished
 	cold.queue_free()
 	frost.queue_free()
+
+func play_sfx(stream, volume_db = 0.0, pitch = 1.0):
+	if stream == null:
+		return
+	var p = AudioStreamPlayer.new()
+	p.stream = stream
+	p.volume_db = volume_db
+	p.pitch_scale = pitch
+	add_child(p)
+	p.play()
+	p.finished.connect(p.queue_free)
+	
