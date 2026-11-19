@@ -36,8 +36,10 @@ var round_intro = false
 # sounds
 var sound_letter = preload("res://assets/Audio/click_002.ogg")
 var sound_wrong = preload("res://assets/Audio/click_005.ogg")
-var sound_word_done = preload("res://assets/Audio/glass_002.ogg")
+var sound_word_done = preload("res://assets/Audio/drop_003.ogg")
 var sound_life_lost = preload("res://assets/Audio/switch_003.ogg")
+var sound_combo = preload("res://assets/Audio/glass_002.ogg")
+
 
 
 
@@ -124,7 +126,7 @@ func _input(event: InputEvent) -> void:
 				
 				if not forbidden.has(locked_word.original):
 					score += 10 * (1 + int(combo / 5.0)) * (2 if double_score else 1) * (2 if rush else 1)
-				
+					
 				if locked_word.text == "":
 					if forbidden.has(locked_word.original):
 						if not rush:
@@ -134,6 +136,8 @@ func _input(event: InputEvent) -> void:
 						if lives <= 0:
 							game_over()
 					else:
+						var earned = locked_word.original.length() * 10 * (1 + int(combo / 5.0)) * (2 if double_score else 1) * (2 if rush else 1)
+						score_popup(earned, locked_word.position + Vector2(30, 30))
 						combo += 1
 						play_sfx(sound_word_done, -3.0)
 						use_special(locked_word.special, locked_word.position)
@@ -572,3 +576,22 @@ func play_sfx(stream, volume_db = 0.0, pitch = 1.0):
 	p.play()
 	p.finished.connect(p.queue_free)
 	
+func score_popup(amount, pos):
+	var l = Label.new()
+	l.text = "+" + str(amount)
+	l.z_index = 50
+	var big = 1.0 + minf(combo * 0.04, 0.8)
+	l.add_theme_font_size_override("font_size", int(30 * big))
+	l.add_theme_color_override("font_color", Color.GOLD if double_score else Color.WHITE)
+	l.add_theme_color_override("font_outline_color", Color("2b2b3a"))
+	l.add_theme_constant_override("outline_size", 8)
+	add_child(l)
+	l.size = l.get_minimum_size()
+	l.pivot_offset = l.size / 2
+	l.position = pos - l.size / 2
+	l.scale = Vector2(0.3, 0.3)
+	var t = create_tween()
+	t.tween_property(l, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.parallel().tween_property(l, "position:y", l.position.y - 70, 0.7).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	t.tween_property(l, "modulate:a", 0.0, 0.25)
+	t.tween_callback(l.queue_free)
