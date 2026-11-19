@@ -166,6 +166,7 @@ func use_special(kind, origin = Vector2.ZERO):
 		life_effect(origin)
 	elif kind == "freeze":
 		frozen = true
+		freeze_effect(4.0)
 		for w in get_tree().get_nodes_in_group("words"):
 			if w.text != "":
 				w.freeze_on()
@@ -506,5 +507,42 @@ func make_ghost(w):
 	tween.tween_property(g, "modulate:a", 0.0, 0.45)
 	tween.tween_callback(g.queue_free)
 	
+func make_frost():
+	var g = Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.65, 1.0])
+	g.colors = PackedColorArray([Color(0.85, 0.96, 1.0, 0.0), Color(0.85, 0.96, 1.0, 0.0), Color(0.85, 0.96, 1.0, 0.7)])
+	var tex = GradientTexture2D.new()
+	tex.gradient = g
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 256
+	tex.height = 144
+	var frost = TextureRect.new()
+	frost.texture = tex
+	frost.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	frost.stretch_mode =TextureRect.STRETCH_SCALE
+	frost.size = Vector2(1152, 648)
+	frost.modulate.a = 0.0
+	frost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$FlashOverlay.add_child(frost)
+	return frost
+
+func freeze_effect(duration):
+	var frost = make_frost()
+	var cold = CanvasModulate.new()
+	cold.color = Color.WHITE
+	add_child(cold)
 	
+	var tween_in = create_tween().set_parallel(true)
+	tween_in.tween_property(cold, "color", Color(0.78, 0.9, 1.0), 0.5).set_trans(Tween.TRANS_SINE)
+	tween_in.tween_property(frost, "modulate:a", 1.0, 0.7).set_trans(Tween.TRANS_SINE)
 	
+	await get_tree().create_timer(duration - 0.8).timeout
+	
+	var tween_out = create_tween().set_parallel(true)
+	tween_out.tween_property(cold, "color", Color.WHITE, 0.8).set_trans(Tween.TRANS_SINE)
+	tween_out.tween_property(frost, "modulate:a", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
+	await tween_out.finished
+	cold.queue_free()
+	frost.queue_free()

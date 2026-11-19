@@ -10,6 +10,7 @@ var normal_outline = 10
 var ice = null
 var shiver_tween = null
 var shiver_base_x = 0.0
+var glow_node = null
 
 func _process(delta: float) -> void:
 	if get_parent().frozen or get_parent().round_intro:
@@ -77,21 +78,42 @@ func freeze_on():
 	shiver_tween.tween_property(self, "position:x", shiver_base_x -1.5, 0.04 )
 	shiver_tween.tween_property(self, "position:x", shiver_base_x + 1.5, 0.04)
 	
+	glow_node = make_glow()
+	var glow_scale = Vector2(size.x * 1.7, size.y * 2.6) / 128.0
+	glow_node.position = position + size / 2
+	glow_node.scale = glow_scale * 0.04
+	glow_node.modulate.a = 0.0
+	get_parent().add_child(glow_node)
+	get_parent().move_child(glow_node, get_index())
+	var glow_in = create_tween().set_parallel(true)
+	glow_in.tween_property(glow_node, "scale", glow_scale, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	glow_in.tween_property(glow_node, "modulate:a", 1.0, 0.5)
+	
+	
 	ice = Node2D.new()
 	ice.position = position
 	get_parent().add_child(ice)
 	get_parent().move_child(ice, get_index())
 	
 	var center = size / 2
-	for i in range(randi_range(5, 7)):
+	var a = size.x / 2 + 2
+	var b = size.y / 2- 2
+	var n = clampi(int(size.x / 26.0) + 3, 5, 12)
+	for i in range(n):
+		var t = (float(i) + randf_range(0.15, 0.85)) / n * TAU
+		var normal = Vector2(cos(t) / a, sin(t) / b).normalized()
 		var c = make_crystal()
-		var dir = Vector2.from_angle(randf() * TAU)
-		c.position = center + Vector2(dir.x * (size.x / 2 + 6),dir.y * (size.y / 2 + 2))
-		c.rotation = dir.angle() + PI / 2 + randf_range(-0.3, 0.3)
-		c.scale = Vector2.ZERO
+		c.position = center + Vector2(cos(t) * a, sin(t) * b)
+		c.rotation = normal.angle() + PI / 2 + randf_range(-0.25, 0.25)
+		var s = randf_range(0.8, 1.25)
+		c.scale = Vector2(0.3, 0.0)
 		ice.add_child(c)
-		create_tween().tween_property(c, "scale", Vector2.ONE * randf_range(0.8, 1.2), 0.25).set_delay(i * 0.05).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	
+		var grow = create_tween()
+		grow.tween_property(c, "scale", Vector2(s, s), 0.4).set_delay( i * 0.04).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		
+		
+		
+		
 	if not tree_exiting.is_connected(freeze_off):
 		tree_exiting.connect(freeze_off)
 
@@ -102,6 +124,13 @@ func freeze_off():
 		shiver_tween.kill()
 	position.x = shiver_base_x
 	self_modulate = Color.WHITE
+	
+	if glow_node:
+		var gnode = glow_node
+		glow_node = null
+		var gt = gnode.create_tween()
+		gt.tween_property(gnode, "modulate:a", 0.0, 0.4)
+		gt.tween_callback(gnode.queue_free)
 	
 	var shards = ice
 	ice = null
@@ -141,3 +170,18 @@ func make_crystal():
 	node.add_child(right)
 	node.add_child(outline)
 	return node
+
+func make_glow():
+	var g = Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 1.0])
+	g.colors = PackedColorArray([Color(0.55, 0.9, 1.0, 0.85), Color(0.55, 0.9, 1.0, 0.0)])
+	var tex = GradientTexture2D.new()
+	tex.gradient = g
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 128
+	tex.height = 128
+	var s = Sprite2D.new()
+	s.texture = tex
+	return s
