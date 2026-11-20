@@ -83,6 +83,7 @@ func start_game():
 	if starting:
 		return
 	starting = true
+	await  squish($PlayButton)
 	var t = create_tween()
 	t.tween_property(fade, "color:a", 1.0, 0.4)
 	await t.finished
@@ -124,6 +125,7 @@ func wobble(button):
 
 func quit_game():
 	starting = true
+	await squish($QuitButton)
 	var t = create_tween()
 	t.tween_property(fade, "color:a", 1.0, 0.4)
 	await t.finished
@@ -167,6 +169,19 @@ func spawn_drift_word(prefill = false):
 	sway.tween_property(l, "rotation", l.rotation + 0.15, 1.5).set_trans(Tween.TRANS_SINE)
 	sway.tween_property(l, "rotation", l.rotation - 0.15, 1.5).set_trans(Tween.TRANS_SINE)
 	
-	
+func squish(button):
+	if button.has_meta("tween"):
+		button.get_meta("tween").kill()
+	var t = create_tween()
+	t.tween_property(button, "scale", Vector2(1.3, 0.7), 0.08)
+	t.tween_property(button, "scale", Vector2(0.9, 1.15), 0.1)
+	t.tween_property(button, "scale", Vector2.ONE, 0.1)
+	await t.finished
+
+
+
+
+
+
 	
 	
