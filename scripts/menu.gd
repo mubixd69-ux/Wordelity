@@ -5,6 +5,8 @@ var words = {}
 var locked = null
 var idle = 0.0
 var hint_shown = false
+var drift_words = ["pop", "jelly", "wiggle", "boing", "cookie", "zigzag", "sparkle", "bubble", "noodle", "waffle", "puddle"]
+
 
 @onready var title = $Title
 @onready var fade = $Fade
@@ -27,6 +29,14 @@ func _ready() -> void:
 	var sway = create_tween().set_loops()
 	sway.tween_property(title, "rotation", 0.04, 1.2).set_trans(Tween.TRANS_SINE)
 	sway.tween_property(title, "rotation", -0.04, 1.2).set_trans(Tween.TRANS_SINE)
+	
+	var spawner = Timer.new()
+	spawner.wait_time = 0.9
+	spawner.timeout.connect(spawn_drift_word)
+	add_child(spawner)
+	spawner.start()
+	for i in range(7):
+		spawn_drift_word(true)
 	
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.is_echo():
@@ -127,4 +137,36 @@ func _process(delta: float) -> void:
 		hint_shown = true
 		create_tween().tween_property($Hint, "modulate:a", 1.0, 0.4)
 		wobble($PlayButton)
+	
+
+func spawn_drift_word(prefill = false):
+	var l = Label.new()
+	l.text = drift_words.pick_random()
+	l.add_theme_font_size_override("font_size", randi_range(36, 64))
+	l.add_theme_constant_override("outline_size", 10)
+	l.add_theme_color_override("font_outline_color", Color("3b1f4a"))
+	l.modulate = Color.from_hsv(randf(), 0.35, 1.0, 0.0)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(l)
+	move_child(l, 1)
+	
+	var start_y = 700.0
+	if prefill:
+		start_y = randf_range(100.0, 600.0)
+	l.position = Vector2(randf_range(40, 1050), start_y)
+	l.rotation = randf_range(-0.2, 0.2)
+	
+	var time = randf_range(9.0, 14.0) * (start_y + 100.0) / 800.0
+	var t = l.create_tween().set_parallel(true)
+	t.tween_property(l, "position:y", - 100.0, time)
+	t.tween_property(l, "modulate:a", 0.5, 1.0)
+	t.tween_property(l, "modulate:a", 0.0, 1.0).set_delay(maxf(time - 1.0, 1.0))
+	t.chain().tween_callback(l.queue_free)
+	
+	var sway = l.create_tween().set_loops()
+	sway.tween_property(l, "rotation", l.rotation + 0.15, 1.5).set_trans(Tween.TRANS_SINE)
+	sway.tween_property(l, "rotation", l.rotation - 0.15, 1.5).set_trans(Tween.TRANS_SINE)
+	
+	
+	
 	
