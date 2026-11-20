@@ -1,0 +1,125 @@
+[gd_scene format=3 uid="uid://dnvpji2as5w04"]
+
+[ext_resource type="Script" uid="uid://1xy7cihgymsv" path="res://scripts/menu.gd" id="1_con2f"]
+[ext_resource type="Texture2D" uid="uid://bxvkt8u4dnj5f" path="res://assets/Pink.png" id="2_mhnvy"]
+[ext_resource type="Script" uid="uid://clryrxcg4be3k" path="res://scripts/background.gd" id="3_4ytvr"]
+[ext_resource type="Texture2D" uid="uid://bhbm3t335gof7" path="res://assets/DEMO_Cozy_UI_Pack_doboui/DEMO_Cozy_UI_Pack_doboui/Containers/Containers/WoodenContainer1.png" id="4_4ytvr"]
+[ext_resource type="Texture2D" uid="uid://b2ffkxb54xxxn" path="res://assets/DEMO_Cozy_UI_Pack_doboui/DEMO_Cozy_UI_Pack_doboui/Buttons/Square/SquareButton2_wood.png" id="5_g3eks"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_g3eks"]
+texture = ExtResource("5_g3eks")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v86rl"]
+texture = ExtResource("5_g3eks")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_13sgg"]
+texture = ExtResource("5_g3eks")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_4ytvr"]
+texture = ExtResource("5_g3eks")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_i6lef"]
+texture = ExtResource("5_g3eks")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_70i5f"]
+texture = ExtResource("5_g3eks")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+
+[node name="Menu" type="Control" unique_id=94315179]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_con2f")
+
+[node name="Background" type="Sprite2D" parent="." unique_id=1801332100]
+z_index = -1
+texture_repeat = 2
+texture = ExtResource("2_mhnvy")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1152, 648)
+script = ExtResource("3_4ytvr")
+
+[node name="Fade" type="ColorRect" parent="." unique_id=201943044]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
+
+[node name="PlayButton" type="Button" parent="." unique_id=1975684759]
+layout_mode = 0
+offset_left = 392.0
+offset_top = 282.0
+offset_right = 721.0
+offset_bottom = 380.0
+theme_override_font_sizes/font_size = 59
+theme_override_styles/normal = SubResource("StyleBoxTexture_g3eks")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_v86rl")
+theme_override_styles/hover = SubResource("StyleBoxTexture_13sgg")
+text = "PLAY"
+
+[node name="QuitButton" type="Button" parent="." unique_id=628387613]
+layout_mode = 0
+offset_left = 392.0
+offset_top = 416.0
+offset_right = 721.0
+offset_bottom = 514.0
+theme_override_font_sizes/font_size = 59
+theme_override_styles/normal = SubResource("StyleBoxTexture_4ytvr")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_i6lef")
+theme_override_styles/hover = SubResource("StyleBoxTexture_70i5f")
+text = "QUIT"
+
+[node name="Title" type="Label" parent="." unique_id=1946353757]
+layout_mode = 0
+offset_left = 270.0
+offset_top = 61.0
+offset_right = 831.0
+offset_bottom = 199.0
+theme_override_font_sizes/font_size = 113
+text = "Wordelity"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NinePatchRect2" type="NinePatchRect" parent="Title" unique_id=1286328613]
+z_index = -1
+layout_mode = 0
+offset_left = -11.0
+offset_top = 9.0
+offset_right = 572.0
+offset_bottom = 150.0
+texture = ExtResource("4_4ytvr")
+patch_margin_left = 32
+patch_margin_top = 32
+patch_margin_right = 32
+patch_margin_bottom = 32
